@@ -1,5 +1,5 @@
 export const environment = {
   production: false,
-  apiUrlUsuario: 'http://localhost:8081',
-  apiUrlCurso: 'http://localhost:8082'
+  apiUrlUsuario: 'http://msvc-usuarios:8080',
+  apiUrlCurso: 'http://msvc-cursos:8080'
 };
