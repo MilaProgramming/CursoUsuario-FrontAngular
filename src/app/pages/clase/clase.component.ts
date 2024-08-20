@@ -2,6 +2,7 @@ import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
+import { environment } from '../../../environments/environment';
 
 interface Curso {
   id: number;
@@ -17,6 +18,8 @@ interface Curso {
 })
 export class ClaseComponent {
 
+  private apiUrlCurso = environment.apiUrlCurso;
+
   clases: Curso[] = [];  // Updated type from any[] to Curso[]
   showModal: boolean = false;
   id: number | null = null;
@@ -30,7 +33,7 @@ export class ClaseComponent {
   }
 
   fetchClases(): void {
-    this.http.get<Curso[]>('http://localhost:8002/cursos').subscribe(
+    this.http.get<Curso[]>(`${this.apiUrlCurso}/cursos`).subscribe(
       data => {
         this.clases = data;
       },
@@ -56,7 +59,7 @@ export class ClaseComponent {
 
   handleAceptarClick(): void {
     if (this.isAddOrUpdate) {
-      this.http.post<Curso>('http://localhost:8002/cursos', { nombre: this.nombre }).subscribe(
+      this.http.post<Curso>(`${this.apiUrlCurso}/cursos`, { nombre: this.nombre }).subscribe(
         (newCurso) => {
           this.clases.push(newCurso);  // Add new class to the list
           this.handleCloseModal();
@@ -66,7 +69,7 @@ export class ClaseComponent {
         }
       );
     } else if (this.id !== null) {
-      this.http.put<void>(`http://localhost:8002/cursos/${this.id}`, { nombre: this.nombre }).subscribe(
+      this.http.put<void>(`${this.apiUrlCurso}/cursos/${this.id}`, { nombre: this.nombre }).subscribe(
         () => {
           this.fetchClases();  // Refresh the list of classes
           this.handleCloseModal();
@@ -86,7 +89,7 @@ export class ClaseComponent {
   }
 
   handleDelete(id: number): void {
-    this.http.delete<void>(`http://localhost:8002/cursos/${id}`).subscribe(
+    this.http.delete<void>(`${this.apiUrlCurso}/cursos/${id}`).subscribe(
       () => {
         this.fetchClases();  // Refresh the list of classes
       },

@@ -2,6 +2,7 @@ import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
+import { environment } from '../../../environments/environment';
 
 // Define the interface for a Usuario
 interface Usuario {
@@ -19,6 +20,8 @@ interface Usuario {
   styleUrls: ['./usuario.component.css']
 })
 export class UsuarioComponent {
+
+  private apiUrlUsuario = environment.apiUrlUsuario;
   usuarios: Usuario[] = [];
   showModal: boolean = false;
   showModalWarning: boolean = false;
@@ -37,7 +40,7 @@ export class UsuarioComponent {
   }
 
   fetchUsuarios(): void {
-    this.http.get<Usuario[]>('http://localhost:8001/api/usuarios/listar').subscribe({
+    this.http.get<Usuario[]>(`${this.apiUrlUsuario}/api/usuarios/listar`).subscribe({
       next: (data) => {
         this.usuarios = data;
       },
@@ -94,7 +97,7 @@ export class UsuarioComponent {
     };
 
     if (this.isAddOrUpdate) {
-      this.http.post<Usuario>('http://localhost:8001/api/usuarios/crear', user).subscribe({
+      this.http.post<Usuario>(`${this.apiUrlUsuario}/api/usuarios/crear`, user).subscribe({
         next: () => {
           this.fetchUsuarios();
           this.handleCloseModal();
@@ -104,7 +107,7 @@ export class UsuarioComponent {
         }
       });
     } else if (this.id) {
-      this.http.put<Usuario>(`http://localhost:8001/api/usuarios/editar/${this.id}`, user).subscribe({
+      this.http.put<Usuario>(`${this.apiUrlUsuario}/api/usuarios/editar/${this.id}`, user).subscribe({
         next: () => {
           this.fetchUsuarios();
           this.handleCloseModal();
@@ -126,7 +129,7 @@ export class UsuarioComponent {
 
   handleDelete(idUser: number): void {
     console.log(`Deleting user with ID ${idUser}`);
-    this.http.delete(`http://localhost:8001/api/usuarios/eliminar/${idUser}`).subscribe({
+    this.http.delete(`${this.apiUrlUsuario}/api/usuarios/eliminar/${idUser}`).subscribe({
       next: () => {
         this.fetchUsuarios();
       },

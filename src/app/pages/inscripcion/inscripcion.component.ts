@@ -2,6 +2,7 @@ import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
+import { environment } from '../../../environments/environment';
 
 interface Usuario {
   id: number;
@@ -30,6 +31,9 @@ interface Curso {
 })
 export class InscripcionComponent {
 
+  private apiUrlCurso = environment.apiUrlCurso;
+  private apiUrlUsuario = environment.apiUrlUsuario;
+
   usuarios: Usuario[] = [];
   cursos: Curso[] = [];
   selectedUsuario: Usuario | null = null;
@@ -44,7 +48,7 @@ export class InscripcionComponent {
   }
 
   fetchUsuarios(): void {
-    this.http.get<Usuario[]>('http://localhost:8001/api/usuarios/listar').subscribe(
+    this.http.get<Usuario[]>(`${this.apiUrlUsuario}/api/usuarios/listar`).subscribe(
       data => {
         this.usuarios = data;
       },
@@ -55,7 +59,7 @@ export class InscripcionComponent {
   }
 
   fetchCursos(): void {
-    this.http.get<Curso[]>('http://localhost:8002/cursos').subscribe(
+    this.http.get<Curso[]>(`${this.apiUrlCurso}/cursos`).subscribe(
       data => {
         this.cursos = data;
       },
@@ -101,7 +105,7 @@ export class InscripcionComponent {
   handleInscribir(cursoId: number): void {
     if (!this.selectedUsuario) return;
 
-    this.http.put(`http://localhost:8002/cursos/${cursoId}/agregar-usuario`, {
+    this.http.put(`${this.apiUrlCurso}/cursos/${cursoId}/agregar-usuario`, {
       id: this.selectedUsuario.id,
       nombre: this.selectedUsuario.nombre,
       email: this.selectedUsuario.email,
@@ -132,7 +136,7 @@ export class InscripcionComponent {
 
     if (inscripcionId === null) return;
 
-    this.http.put(`http://localhost:8002/cursos/${cursoId}/eliminar-usuario/${inscripcionId}`, {}).subscribe(
+    this.http.put(`${this.apiUrlCurso}/cursos/${cursoId}/eliminar-usuario/${inscripcionId}`, {}).subscribe(
       () => {
         this.selectedCurso = this.selectedCurso.filter(curso => curso.id !== cursoId);
         if (this.selectedCurso.length === 0) {
