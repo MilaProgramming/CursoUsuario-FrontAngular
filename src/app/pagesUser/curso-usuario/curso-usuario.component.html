@@ -1,0 +1,45 @@
+<div class="inscripcion">
+
+  <div *ngIf="selectedUsuario">
+    <div *ngIf="isEnrolled">
+      <table class="courses-table">
+        <thead>
+          <tr>
+            <th colSpan="3">Este usuario ya se encuentra inscrito en un curso</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let curso of selectedCurso">
+            <td>{{ curso.nombre }}</td>
+            <td class="actions">
+              <button class="desinscribir" (click)="handleDesinscribir(curso.id)">Desinscribir</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div *ngIf="!isEnrolled">
+      <table class="courses-table">
+        <thead>
+          <tr>
+            <th>Curso</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let curso of cursos">
+            <td>{{ curso.nombre }}</td>
+            <td class="actions">
+              <button (click)="handleInscribir(curso.id)">Inscribir</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="perrito">
+    <img src="assets/perrito.gif" alt="Scrolling GIF" class="gif" />
+  </div>
+</div>

@@ -1,0 +1,20 @@
+<div class="login-container" *ngIf="isLoginMode">
+  <h2>Inicia sesión</h2>
+  <form>
+    <input type="email" placeholder="Correo electrónico" required>
+    <input type="password" placeholder="Contraseña" required>
+    <button type="submit">Iniciar sesión</button>
+  </form>
+  <p>¿No tienes una cuenta? <a href="#" (click)="toggleMode()">Regístrate</a></p>
+</div>
+
+<div class="login-container" *ngIf="!isLoginMode">
+  <h2>Regístrate</h2>
+  <form>
+    <input type="text" placeholder="Nombre" required>
+    <input type="email" placeholder="Correo electrónico" required>
+    <input type="password" placeholder="Contraseña" required>
+    <button type="submit">Registrarse</button>
+  </form>
+  <p>¿Ya tienes una cuenta? <a href="#" (click)="toggleMode()">Inicia sesión</a></p>
+</div>

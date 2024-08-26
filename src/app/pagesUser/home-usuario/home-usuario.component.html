@@ -1,0 +1,13 @@
+<div class="grid-principal">
+  <div class="botones-nivel1">
+    <div>
+      <button class="boton-tabla" (click)="setTabla('usuario')">Mi Perfil</button>
+      <button class="boton-tabla" (click)="setTabla('curso')">Cursos</button>
+    </div>
+    <button class="boton-tabla">Cerrar sesión</button>
+  </div>
+  <div class="contenido-2">
+    <app-usuario-usuario *ngIf="tabla === 'usuario'"></app-usuario-usuario>
+    <app-curso-usuario *ngIf="tabla === 'curso'"></app-curso-usuario>
+  </div>
+</div>

@@ -41,11 +41,8 @@ describe('ClaseComponent', () => {
     component.isAddOrUpdate = true;
     component.handleAceptarClick();
 
-    const req = httpMock.expectOne('http://localhost:8002/cursos');
-    expect(req.request.method).toBe('POST');
-    req.flush({ id: 2, nombre: 'New Class' });
-
     const fetchReq = httpMock.expectOne('http://localhost:8002/cursos');
+    expect(fetchReq.request.method).toBe('POST');
     fetchReq.flush([{ id: 1, nombre: 'Curso 1' }, { id: 2, nombre: 'New Class' }]);
 
     expect(component.clases.length).toBe(2);

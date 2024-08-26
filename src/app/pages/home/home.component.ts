@@ -11,6 +11,7 @@ import { InscripcionComponent } from '../inscripcion/inscripcion.component';
   templateUrl: './home.component.html',
   styleUrl: './home.component.css'
 })
+
 export class HomeComponent {
   tabla: string = 'usuario';
 

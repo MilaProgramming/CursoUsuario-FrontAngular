@@ -1,0 +1,100 @@
+<div class="container">
+  <div class="icon-container">
+    <i class="fa fa-user"></i>
+  </div>
+  <div class="table-container">
+    <table class="usuario-tabla">
+      <tr>
+        <th>ID</th>
+        <td>1</td>
+      </tr>
+      <tr>
+        <th>Nombre</th>
+        <td>John</td>
+      </tr>
+      <tr>
+        <th>Email</th>
+        <td>johnmail.com</td>
+      </tr>
+    </table>
+
+  </div>
+</div>
+
+<div class="botones">
+  <button class="boton-tabla" (click)="openEditModal()">Editar Datos</button>
+  <button class="boton-tabla" (click)="handleUpdatePasswordClick()">Cambiar clave</button>
+</div>
+
+
+<div *ngIf="showEditModal" class="modal">
+  <div class="modal-content">
+    <span
+      class="close-icon"
+      (click)="handleCloseEditModal()"
+      tabindex="0"
+      aria-label="Cerrar Modal"
+      (keydown.enter)="handleCloseEditModal()"
+    >×</span>
+    <h3>Editar Datos</h3>
+    <div class="editar-inputs">
+      <div class="editar-nombre">
+        <label for="editarNombre">Nombre</label>
+        <input
+          id="editarNombre"
+          type="text"
+          [(ngModel)]="nombre"
+        />
+      </div>
+      <div class="editar-email">
+        <label for="editarEmail">Email</label>
+        <input
+          id="editarEmail"
+          type="text"
+          [(ngModel)]="email"
+        />
+      </div>
+    </div>
+    <div class="modal-buttons">
+      <button (click)="handleEditAceptarClick()">
+        Guardar Cambios
+      </button>
+      <button
+        class="cancelar"
+        (click)="handleCloseEditModal()"
+        tabindex="0"
+        aria-label="Cancelar"
+      >Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<div *ngIf="showChangePasswordModal" class="modal">
+  <div class="modal-content">
+    <span class="close-icon" (click)="handleCloseChangePasswordModal()" tabindex="0" aria-label="Cerrar Modal"
+    (keydown.enter)="handleCloseChangePasswordModal()"
+    >×</span>
+    <h3>Cambiar Contraseña</h3>
+    <div class="agregar-inputs">
+      <div class="agregar-password">
+        <label for="currentPassword">Contraseña Actual</label>
+        <input id="currentPassword" type="password" [(ngModel)]="currentPassword" />
+      </div>
+      <div class="agregar-password">
+        <label for="newPassword">Nueva Contraseña</label>
+        <input id="newPassword" type="password" [(ngModel)]="newPassword" (input)="checkNewPasswordMatch()" />
+      </div>
+      <div class="agregar-password">
+        <label for="confirmNewPassword">Confirmar Nueva Contraseña</label>
+        <input id="confirmNewPassword" type="password" [(ngModel)]="confirmNewPassword" (input)="checkNewPasswordMatch()" />
+      </div>
+      <p *ngIf="!passwordsMatch" class="error">Las contraseñas no coinciden</p>
+    </div>
+    <div [ngClass]="{ 'modal-buttons': passwordsMatch, 'modal-buttons-error': !passwordsMatch }">
+      <button (click)="handleSaveNewPassword()" [disabled]="!passwordsMatch">
+        Actualizar
+      </button>
+      <button class="cancelar" (click)="handleCloseChangePasswordModal()" tabindex="0" aria-label="Cancelar">Cancelar</button>
+    </div>
+  </div>
+</div>
