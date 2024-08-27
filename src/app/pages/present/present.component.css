@@ -1,0 +1,51 @@
+.container-home{
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: auto auto;
+  gap: 1rem;
+  padding: 1rem;
+  background-color: #f5f5f5;
+  overflow: hidden;
+  font-family: 'Roboto', sans-serif;
+  height: 90vh;
+}
+
+.perrito {
+  margin-top: 9rem;
+  background-color: #F5F5F5;
+  white-space: nowrap;
+  width: 100%;
+  position: relative;
+}
+
+.gif {
+  display: inline-block;
+  height: 20rem;
+  animation: scroll-right 5s linear infinite;
+}
+
+@keyframes scroll-right {
+0% {
+  transform: translateX(-250%);
+}
+100% {
+  transform: translateX(460%);
+}
+}
+
+.boton-tabla {
+  font-family: 'Roboto', sans-serif;
+  padding: 10px 20px;
+  border: 2px solid black;
+  border-radius: 50px;
+  background-color: white;
+  color: black;
+  cursor: pointer;
+  transition: background-color 0.3s, color 0.3s;
+  margin: 0.5rem;
+}
+
+.boton-tabla:hover {
+  background-color: black;
+  color: white;
+}
