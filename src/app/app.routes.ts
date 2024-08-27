@@ -6,7 +6,7 @@ import { PresentComponent } from './pages/present/present.component';
 
 export const routes: Routes = [
   {
-    path: 'home',
+    path: '',
     component: HomeComponent
   },
   {
@@ -18,7 +18,7 @@ export const routes: Routes = [
     component: LoginRegisterComponent
   },
   {
-    path: '',
+    path: 'home',
     component : PresentComponent
   }
 
