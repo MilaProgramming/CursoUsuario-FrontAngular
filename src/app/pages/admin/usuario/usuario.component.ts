@@ -2,7 +2,7 @@ import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
-import { environment } from '../../../environments/environment';
+import { environment } from '../../../../environments/environment';
 
 // Define the interface for a Usuario
 interface Usuario {
