@@ -1,61 +1,60 @@
-import { Component } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { FormsModule } from '@angular/forms';
+import { environment } from '../../../../environments/environment';
+import { KeycloakService } from '../../../services/keycloack.service';
+import { map } from 'rxjs/operators';
 
+interface Usuario {
+  id: number;
+  nombre: string;
+  email: string;
+  password?: string; // Optional if not used for fetching
+}
 
 @Component({
   selector: 'app-usuario-usuario',
   standalone: true,
-  imports: [FormsModule, CommonModule],
+  imports: [CommonModule, FormsModule, HttpClientModule],
   templateUrl: './usuario-usuario.component.html',
-  styleUrl: './usuario-usuario.component.css'
+  styleUrls: ['./usuario-usuario.component.css']
 })
+export class UsuarioUsuarioComponent implements OnInit {
+  usuario: Usuario | null = null;
+  private apiUrl = environment.apiUrlUsuario;
+  private http = inject(HttpClient);
+  private keycloakService = inject(KeycloakService);
 
-
-export class UsuarioUsuarioComponent {
-  showEditModal: boolean = false;
-  nombre: string = 'John Doe';
-  email: string = 'john.doe@example.com';
-  showChangePasswordModal = false;
-  currentPassword = '123';
-  newPassword = '';
-  confirmNewPassword = '';
-  passwordsMatch = true;
-
-  // Function to open the modal with preset values
-  openEditModal() {
-    this.showEditModal = true;
+  ngOnInit(): void {
+    this.loadUsuarioData();
   }
 
-  // Function to handle closing the modal
-  handleCloseEditModal() {
-    this.showEditModal = false;
-  }
-
-  // Function to handle saving the changes
-  handleEditAceptarClick() {
-    // Implement the logic to update the user data
-    // Then close the modal
-    this.handleCloseEditModal();
-  }
-
-  checkNewPasswordMatch() {
-    this.passwordsMatch = this.newPassword === this.confirmNewPassword;
-  }
-
-  handleUpdatePasswordClick() {
-    this.showChangePasswordModal = true;
-  }
-
-  handleSaveNewPassword() {
-    if (this.passwordsMatch) {
-      // Handle the password update logic here
-      console.log('Password updated successfully.');
-      this.handleCloseChangePasswordModal();
+  private loadUsuarioData(): void {
+    const username = this.getUserName();
+    if (username) {
+      this.getUsuarioByUsername(username).subscribe((usuario) => {
+        if (usuario && usuario.id) {
+          this.getUsuarioById(usuario.id).subscribe((usuarioDetalle) => {
+            this.usuario = usuarioDetalle;
+          });
+        }
+      });
     }
   }
 
-  handleCloseChangePasswordModal() {
-    this.showChangePasswordModal = false;
+  private getUserName(): string | null {
+    const tokenParsed = this.keycloakService['keycloakInstance'].tokenParsed;
+    return tokenParsed ? tokenParsed['preferred_username'] : null;
+  }
+
+  private getUsuarioByUsername(username: string) {
+    return this.http.get<Usuario[]>(`${this.apiUrl}/api/usuarios/listar`).pipe(
+      map(users => users.find(user => user.nombre === username))
+    );
+  }
+
+  private getUsuarioById(id: number) {
+    return this.http.get<Usuario>(`${this.apiUrl}/api/usuarios/detalle/${id}`);
   }
 }

@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { Component} from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { KeycloakService } from '../../services/keycloack.service';
 
@@ -6,12 +7,18 @@ import { KeycloakService } from '../../services/keycloack.service';
   selector: 'app-present',
   standalone: true,
   templateUrl: './present.component.html',
-  styleUrls: ['./present.component.css']
+  styleUrls: ['./present.component.css'],
+  imports: [CommonModule]
 })
 export class PresentComponent {
+
+  isLoggedIn: boolean = false;
+  userName: string | null = null;
+
   constructor(private keycloakService: KeycloakService, private router: Router) {
     console.log('PresentComponent initialized');
   }
+
 
   async login(): Promise<void> {
     try {
@@ -41,4 +48,5 @@ export class PresentComponent {
       this.router.navigate(['/']);
     }
   }
+
 }
