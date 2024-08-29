@@ -22,6 +22,8 @@ export class PresentComponent {
 
   async login(): Promise<void> {
     try {
+
+      console.log('Attempting login...');
       await this.keycloakService.init();
 
       if (this.keycloakService.isAuthenticated()) {
