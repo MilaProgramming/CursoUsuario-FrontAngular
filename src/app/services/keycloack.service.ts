@@ -68,4 +68,11 @@ export class KeycloakService {
   logToken(): void {
     console.log('Token:', this.keycloakInstance.token);
   }
+
+  logout(): void {
+    this.keycloakInstance.logout({
+      redirectUri: window.location.origin,
+    });
+  }
+
 }

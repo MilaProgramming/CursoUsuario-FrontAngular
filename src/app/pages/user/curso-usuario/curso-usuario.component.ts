@@ -1,66 +1,76 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { environment } from '../../../../environments/environment';
+import { KeycloakService } from '../../../services/keycloack.service';
+import { map } from 'rxjs/operators';
 
 interface Usuario {
   id: number;
   nombre: string;
   email: string;
-  password: string;
-}
-
-interface CursoUsuario {
-  id: number;
-  usuarioId: number;
+  password?: string;
 }
 
 interface Curso {
   id: number;
   nombre: string;
-  cursoUsuarios: CursoUsuario[];
+  cursoUsuarios: { id: number; usuarioId: number }[];
 }
 
 @Component({
   selector: 'app-curso-usuario',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, HttpClientModule],
   templateUrl: './curso-usuario.component.html',
-  styleUrl: './curso-usuario.component.css'
+  styleUrls: ['./curso-usuario.component.css']
 })
-export class CursoUsuarioComponent {
-  private apiUrlCurso = environment.apiUrlCurso;
-  private apiUrlUsuario = environment.apiUrlUsuario;
-
-  usuarios: Usuario[] = [];
+export class CursoUsuarioComponent implements OnInit {
+  usuario: Usuario | null = null;
   cursos: Curso[] = [];
-  selectedUsuario: Usuario | null = null;
-  selectedCurso: Curso[] = [];
   isEnrolled: boolean = false;
 
-  private http = inject(HttpClient);
+  private apiUrlUsuario = environment.apiUrlUsuario;
+  private apiUrlCurso = environment.apiUrlCurso;
 
-  constructor() {
-    this.fetchUsuarios();
+  private http = inject(HttpClient);
+  private keycloakService = inject(KeycloakService);
+
+  ngOnInit(): void {
+    this.loadUsuarioData();
     this.fetchCursos();
   }
 
-  fetchUsuarios(): void {
-    this.http.get<Usuario[]>(`${this.apiUrlUsuario}/api/usuarios/listar`).subscribe(
-      data => {
-        this.usuarios = data;
-      },
-      error => {
-        console.error('Error fetching usuarios:', error);
-      }
+  private loadUsuarioData(): void {
+    const username = this.getUserName();
+    if (username) {
+      this.getUsuarioByUsername(username).subscribe(usuario => {
+        if (usuario && usuario.id) {
+          this.usuario = usuario;
+        }
+      });
+    }
+  }
+
+  private getUserName(): string | null {
+    const tokenParsed = this.keycloakService['keycloakInstance'].tokenParsed;
+    return tokenParsed ? tokenParsed['preferred_username'] : null;
+  }
+
+  private getUsuarioByUsername(username: string) {
+    return this.http.get<Usuario[]>(`${this.apiUrlUsuario}/api/usuarios/listar`).pipe(
+      map(users => users.find(user => user.nombre === username))
     );
   }
 
-  fetchCursos(): void {
+  private fetchCursos(): void {
     this.http.get<Curso[]>(`${this.apiUrlCurso}/cursos`).subscribe(
       data => {
         this.cursos = data;
+        if (this.usuario) {
+          this.checkEnrollment();
+        }
       },
       error => {
         console.error('Error fetching cursos:', error);
@@ -68,61 +78,38 @@ export class CursoUsuarioComponent {
     );
   }
 
-  getCursoUsuarioId(cursoId: number, usuarioId: number): number | null {
-    const curso = this.cursos.find(c => c.id === cursoId);
-    if (curso) {
-      const cursoUsuario = curso.cursoUsuarios.find((cu: CursoUsuario) => cu.usuarioId === usuarioId);
-      if (cursoUsuario) {
-        return cursoUsuario.id;
-      }
-    }
-    return null;
+  private checkEnrollment(): void {
+    if (!this.usuario) return;
+
+    this.isEnrolled = this.cursos.some(curso =>
+      curso.cursoUsuarios.some(cursoUsuario => cursoUsuario.usuarioId === this.usuario?.id)
+    );
   }
 
-  handleUsuarioChange(event: Event): void {
-    const selectedId = (event.target as HTMLSelectElement).value;
-    const usuario = this.usuarios.find(u => u.id === parseInt(selectedId));
-    this.selectedUsuario = usuario || null;
+  get enrolledCursos(): Curso[] {
+    return this.cursos.filter(curso =>
+      curso.cursoUsuarios.some(cu => cu.usuarioId === this.usuario?.id)
+    );
+  }
 
-    let enrolled = false;
-    for (const curso of this.cursos) {
-      for (const cursoUsuario of curso.cursoUsuarios) {
-        if (cursoUsuario.usuarioId === usuario?.id) {
-          enrolled = true;
-          this.isEnrolled = true;
-          this.selectedCurso = [curso];
-          break;
-        }
-      }
-      if (enrolled) {
-        return;
-      }
-    }
-    this.isEnrolled = false;
+  get availableCursos(): Curso[] {
+    return this.cursos.filter(curso =>
+      !curso.cursoUsuarios.some(cu => cu.usuarioId === this.usuario?.id)
+    );
   }
 
   handleInscribir(cursoId: number): void {
-    if (!this.selectedUsuario) return;
+    if (!this.usuario) return;
 
     this.http.put(`${this.apiUrlCurso}/cursos/${cursoId}/agregar-usuario`, {
-      id: this.selectedUsuario.id,
-      nombre: this.selectedUsuario.nombre,
-      email: this.selectedUsuario.email,
-      password: this.selectedUsuario.password
+      id: this.usuario.id,
+      nombre: this.usuario.nombre,
+      email: this.usuario.email,
+      password: this.usuario.password
     }).subscribe(
       () => {
-        this.cursos = this.cursos.map(curso => {
-          if (curso.id === cursoId) {
-            return {
-              ...curso,
-              cursoUsuarios: [...curso.cursoUsuarios, { id: 0, usuarioId: this.selectedUsuario?.id || 0 }]
-            };
-          }
-          return curso;
-        });
-        this.selectedCurso = this.cursos.filter(curso => curso.id === cursoId);
-        this.isEnrolled = true;
         this.fetchCursos();
+        this.checkEnrollment();
       },
       error => {
         console.error('Error adding inscripcion:', error);
@@ -131,17 +118,14 @@ export class CursoUsuarioComponent {
   }
 
   handleDesinscribir(cursoId: number): void {
-    const inscripcionId = this.getCursoUsuarioId(cursoId, this.selectedUsuario?.id || 0);
+    const inscripcionId = this.getCursoUsuarioId(cursoId);
 
     if (inscripcionId === null) return;
 
     this.http.put(`${this.apiUrlCurso}/cursos/${cursoId}/eliminar-usuario/${inscripcionId}`, {}).subscribe(
       () => {
-        this.selectedCurso = this.selectedCurso.filter(curso => curso.id !== cursoId);
-        if (this.selectedCurso.length === 0) {
-          this.isEnrolled = false;
-        }
         this.fetchCursos();
+        this.checkEnrollment();
       },
       error => {
         console.error('Error removing inscripcion:', error);
@@ -149,4 +133,25 @@ export class CursoUsuarioComponent {
     );
   }
 
+  private getCursoUsuarioId(cursoId: number): number | null {
+    // Find the curso by ID
+    const curso = this.cursos.find(c => c.id === cursoId);
+
+    // Check if curso is found and usuario is not null
+    if (curso && this.usuario) {
+      // Check if curso.cursoUsuarios is defined and not null
+      const cursoUsuarios = curso.cursoUsuarios;
+
+      if (cursoUsuarios) {
+        // Use optional chaining to safely access usuario.id
+        const cursoUsuario = cursoUsuarios.find(cu => cu.usuarioId === this.usuario?.id);
+
+        // Return the ID if found, otherwise return null
+        if (cursoUsuario) {
+          return cursoUsuario.id;
+        }
+      }
+    }
+    return null;
+  }
 }

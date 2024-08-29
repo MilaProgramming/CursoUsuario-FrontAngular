@@ -1,25 +1,10 @@
 <div class="inscripcion">
+  <h2>Bienvenido, {{ usuario?.nombre }}</h2>
+  <p>Tu email es: {{ usuario?.email }}</p>
 
-  <div *ngIf="selectedUsuario">
+  <div *ngIf="usuario">
     <div *ngIf="isEnrolled">
-      <table class="courses-table">
-        <thead>
-          <tr>
-            <th colSpan="3">Este usuario ya se encuentra inscrito en un curso</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let curso of selectedCurso">
-            <td>{{ curso.nombre }}</td>
-            <td class="actions">
-              <button class="desinscribir" (click)="handleDesinscribir(curso.id)">Desinscribir</button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <div *ngIf="!isEnrolled">
+      <h3>Ya estás inscrito en el curso:</h3>
       <table class="courses-table">
         <thead>
           <tr>
@@ -28,7 +13,27 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let curso of cursos">
+          <tr *ngFor="let curso of enrolledCursos">
+            <td>{{ curso.nombre }}</td>
+            <td class="actions">
+              <button (click)="handleDesinscribir(curso.id)">Desinscribir</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div *ngIf="!isEnrolled">
+      <h3>Selecciona un curso para inscribirte:</h3>
+      <table class="courses-table">
+        <thead>
+          <tr>
+            <th>Curso</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let curso of availableCursos">
             <td>{{ curso.nombre }}</td>
             <td class="actions">
               <button (click)="handleInscribir(curso.id)">Inscribir</button>
@@ -37,9 +42,5 @@
         </tbody>
       </table>
     </div>
-  </div>
-
-  <div class="perrito">
-    <img src="assets/perrito.gif" alt="Scrolling GIF" class="gif" />
   </div>
 </div>

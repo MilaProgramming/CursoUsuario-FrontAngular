@@ -23,4 +23,8 @@ export class HomeComponent{
   setTabla(tabla: string) {
     this.tabla = tabla;
   }
+
+  logout() {
+    this.keycloakService.logout();
+  }
 }
