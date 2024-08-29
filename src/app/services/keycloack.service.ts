@@ -6,6 +6,7 @@ import Keycloak from 'keycloak-js';
 })
 export class KeycloakService {
   private keycloakInstance: Keycloak;
+  private initPromise: Promise<void> | null = null;
 
   constructor() {
     this.keycloakInstance = new Keycloak({
@@ -16,8 +17,13 @@ export class KeycloakService {
   }
 
   init(): Promise<void> {
+    if (this.initPromise) {
+      console.log('Keycloak is already initializing or initialized.');
+      return this.initPromise;
+    }
+
     console.log('Initializing Keycloak...');
-    return this.keycloakInstance
+    this.initPromise = this.keycloakInstance
       .init({
         onLoad: 'login-required',
       })
@@ -31,8 +37,11 @@ export class KeycloakService {
       })
       .catch(err => {
         console.error('Keycloak initialization error:', err);
+        this.initPromise = null; // Reset promise if initialization fails
         throw err;
       });
+
+    return this.initPromise;
   }
 
   isAuthenticated(): boolean {
@@ -60,4 +69,3 @@ export class KeycloakService {
     console.log('Token:', this.keycloakInstance.token);
   }
 }
-

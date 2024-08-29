@@ -1,40 +1,44 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
-import { KeycloakService } from '../../services/keycloack.service'; // Adjust path if necessary
+import { KeycloakService } from '../../services/keycloack.service';
 
 @Component({
   selector: 'app-present',
   standalone: true,
   templateUrl: './present.component.html',
-  styleUrls: ['./present.component.css'] // Ensure correct path
+  styleUrls: ['./present.component.css']
 })
 export class PresentComponent {
-  private keycloakInitialized: boolean = false;
-
   constructor(private keycloakService: KeycloakService, private router: Router) {
     console.log('PresentComponent initialized');
   }
 
-  private async initializeKeycloak(): Promise<void> {
+  async login(): Promise<void> {
     try {
-      if (!this.keycloakInitialized) {
-        await this.keycloakService.init();
-        this.keycloakInitialized = true;
+      await this.keycloakService.init();
+
+      if (this.keycloakService.isAuthenticated()) {
+        console.log('User is already authenticated');
+        this.redirectUser();
       }
     } catch (error) {
-      console.error('Error initializing Keycloak:', error);
+      console.error('Error during login:', error);
     }
   }
 
-  async login(): Promise<void> {
-    if (!this.keycloakInitialized) {
-      await this.initializeKeycloak();
-    }
+  private redirectUser(): void {
+    const userRoles = this.keycloakService.getUserRoles();
+    console.log('User roles:', userRoles); // Log user roles
 
-    if (this.keycloakService.isAuthenticated()) {
-      console.log('User is already authenticated');
+    if (userRoles.includes('admin')) {
+      console.log('Redirecting to /home');
+      this.router.navigate(['/home']);
+    } else if (userRoles.includes('usuario')) {
+      console.log('Redirecting to /homeUsuario');
+      this.router.navigate(['/homeUsuario']);
     } else {
-      this.keycloakService.init(); // Start the login process
+      console.warn('No valid role found for redirection');
+      this.router.navigate(['/']);
     }
   }
 }

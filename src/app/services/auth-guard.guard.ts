@@ -7,6 +7,7 @@ export const authGuardGuard: CanActivateFn = async (route, state) => {
   const router = inject(Router);
 
   try {
+    console.log('Guard: initializing Keycloak');
     await keycloakService.init();
 
     keycloakService.logToken(); // Log the token
