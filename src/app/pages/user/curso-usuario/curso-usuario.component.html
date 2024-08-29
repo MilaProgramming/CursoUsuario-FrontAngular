@@ -16,7 +16,7 @@
           <tr *ngFor="let curso of enrolledCursos">
             <td>{{ curso.nombre }}</td>
             <td class="actions">
-              <button (click)="handleDesinscribir(curso.id)">Desinscribir</button>
+              <button class="desinscribir" (click)="handleDesinscribir(curso.id)">Desinscribir</button>
             </td>
           </tr>
         </tbody>
