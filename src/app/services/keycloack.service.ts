@@ -1,76 +1,63 @@
 import { Injectable } from '@angular/core';
-import { KeycloakService, KeycloakEventType } from 'keycloak-angular';
-import { KeycloakProfile } from 'keycloak-js';
+import Keycloak from 'keycloak-js';
 
 @Injectable({
   providedIn: 'root',
 })
+export class KeycloakService {
+  private keycloakInstance: Keycloak;
 
-export class KeycloackService {
-  private userProfile: KeycloakProfile | null = null;
+  constructor() {
+    this.keycloakInstance = new Keycloak({
+      url: 'http://keycloak-service:8080',
+      realm: 'Microservicios',
+      clientId: 'angular',
+    });
+  }
 
-  constructor(private keycloak: KeycloakService) {}
-
-  async init(): Promise<void> {
-    try {
-      await this.keycloak.init({
-        config: {
-          url: 'http://localhost:8080', // Keycloak server URL
-          realm: 'master', // Your realm name
-          clientId: 'my-angular-app', // Your client ID
-        },
-        initOptions: {
-          onLoad: 'login-required', // Redirect to login page if not authenticated
-          pkceMethod: 'S256', // Recommended for public clients
-          checkLoginIframe: false,
-        },
-        loadUserProfileAtStartUp: true,
-        enableBearerInterceptor: true,
-        bearerExcludedUrls: ['/assets'],
+  init(): Promise<void> {
+    console.log('Initializing Keycloak...');
+    return this.keycloakInstance
+      .init({
+        onLoad: 'login-required',
+      })
+      .then(authenticated => {
+        console.log('Keycloak initialized:', authenticated);
+        if (!authenticated) {
+          window.location.reload();
+        } else {
+          localStorage.setItem('token', this.keycloakInstance.token || '');
+        }
+      })
+      .catch(err => {
+        console.error('Keycloak initialization error:', err);
+        throw err;
       });
+  }
 
-      this.userProfile = await this.keycloak.loadUserProfile();
-      console.log('User Profile loaded:', this.userProfile);
+  isAuthenticated(): boolean {
+    return this.keycloakInstance.authenticated || false;
+  }
 
-      this.keycloak.keycloakEvents$.subscribe({
-        next: (event) => {
-          if (event.type === KeycloakEventType.OnAuthSuccess) {
-            console.log('Authentication successful!');
-          }
-        },
-      });
-    } catch (error) {
-      console.error('Keycloak initialization failed', error);
+  getToken(): string | undefined {
+    return this.keycloakInstance.token;
+  }
+
+  getUserRoles(): string[] {
+    const tokenParsed = this.keycloakInstance.tokenParsed;
+    console.log('Token Parsed:', tokenParsed); // Log the token content
+    if (tokenParsed && tokenParsed.realm_access) {
+      return tokenParsed.realm_access.roles || [];
     }
+    return [];
   }
 
-  login(): void {
-    this.keycloak.login();
+  hasRole(role: string): boolean {
+    return this.getUserRoles().includes(role);
   }
 
-  logout(): void {
-    this.keycloak.logout();
+  logToken(): void {
+    console.log('Token:', this.keycloakInstance.token);
   }
-
-  async getToken(): Promise<string | undefined> {
-    return this.keycloak.getToken();
-  }
-
-  async isAuthenticated(): Promise<boolean> {
-    return this.keycloak.isLoggedIn();
-  }
-
-  getUserProfile(): KeycloakProfile | null {
-    return this.userProfile;
-  }
-
-  async getUserRoles(): Promise<string[]> {
-    return this.keycloak.getUserRoles();
-  }
-
-  async hasRole(role: string): Promise<boolean> {
-    const roles = await this.getUserRoles();
-    return roles.includes(role);
-  }
-
 }
+

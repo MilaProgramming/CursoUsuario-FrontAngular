@@ -1,19 +1,18 @@
 import { Component } from '@angular/core';
-import { KeycloackService } from '../../services/keycloack.service';
+import { KeycloakService } from '../../services/keycloack.service'; // Adjust path if necessary
 
 @Component({
   selector: 'app-present',
   standalone: true,
-  imports: [],
   templateUrl: './present.component.html',
-  styleUrl: './present.component.css'
+  styleUrls: ['./present.component.css'] // Ensure correct path
 })
 export class PresentComponent {
-
-  constructor(private keycloackService: KeycloackService) { }
-
-  onAccessButtonClick() {
-    this.keycloackService.login();
+  constructor(private keycloakService: KeycloakService) {
+    console.log('PresentComponent initialized');
   }
 
+  login() {
+    this.keycloakService.init();
+  }
 }

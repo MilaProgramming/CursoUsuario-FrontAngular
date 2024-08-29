@@ -1,33 +1,29 @@
 import { Routes } from '@angular/router';
 import { HomeComponent } from './pages/admin/home/home.component';
+import { LoginRegisterComponent } from './login-register/login-register.component';
 import { HomeUsuarioComponent } from './pages/user/home-usuario/home-usuario.component';
 import { PresentComponent } from './pages/home/present.component';
-import { AuthGuardService } from './services/auth-guard.service'; // Import the AuthGuard
+import { authGuardGuard } from './services/auth-guard.guard'; // Ensure correct path
 
 export const routes: Routes = [
   {
     path: 'home',
     component: HomeComponent,
-    canActivate: [AuthGuardService],
-    data: { role: 'admin' } // Only 'admin' role can access this route
+    canActivate: [authGuardGuard],
+    data: { role: 'admin' }
   },
   {
     path: 'homeUsuario',
     component: HomeUsuarioComponent,
-    canActivate: [AuthGuardService],
-    data: { role: 'usuario' } // Only 'usuario' role can access this route
+    canActivate: [authGuardGuard],
+    data: { role: 'usuario' }
   },
   {
-    path: 'present',
-    component : PresentComponent
+    path: 'login',
+    component: LoginRegisterComponent
   },
   {
     path: '',
-    redirectTo: '/present',
-    pathMatch: 'full'
-  },
-  {
-    path: '**',
-    redirectTo: '/present'
+    component: PresentComponent
   }
 ];
