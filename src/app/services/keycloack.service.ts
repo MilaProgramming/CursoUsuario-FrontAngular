@@ -10,7 +10,7 @@ export class KeycloakService {
 
   constructor() {
     this.keycloakInstance = new Keycloak({
-      url: 'http://localhost:8080',
+      url: 'http://keycloak-service:8080',
       realm: 'Microservicios',
       clientId: 'angular',
     });
